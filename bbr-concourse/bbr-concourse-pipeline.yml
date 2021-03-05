@@ -29,13 +29,13 @@ jobs:
     file: bbr-pipeline-tasks-repo/tasks/extract-bbr-binary/task.yml
 
   - task: bbr-backup-concourse
-    file: bbr-concourse-repo/bbr-concourse-backup-task.yml
+    file: bbr-concourse-repo/bbr-concourse/bbr-concourse-backup-task.yml
     params:
       DEPLOYMENT_NAME: concourse
       <<: *opsman_credentials
     on_failure:
       task: bbr-cleanup-concourse
-      file: bbr-concourse-repo/bbr-concourse-cleanup-task.yml
+      file: bbr-concourse-repo/bbr-concourse/bbr-concourse-cleanup-task.yml
       params:
         DEPLOYMENT_NAME: concourse
         <<: *opsman_credentials
@@ -59,7 +59,7 @@ resources:
 - name: bbr-concourse-repo
   type: git
   source:
-    uri: https://github.com/ambercs/bbr-concourse.git
+    uri: https://github.com/ambercs/platform-tools.git
     branch: main
 - name: concourse-backup-bucket
   type: s3
