@@ -1,30 +1,40 @@
 
-opsman_credentials: &opsman_credentials
-  SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
-  OPSMAN_URL: ((opsman.url))
-  OPSMAN_USERNAME: ((opsman.username))
-  OPSMAN_PASSWORD: ((opsman.password))
-  OPSMAN_PRIVATE_KEY: ((opsman.private-key))
-
-s3_credentials: &s3_credentials
-  bucket: ((storage.backup-bucket))
-  region_name: ((storage.region))
-  access_key_id: ((aws_credentials.access_key_id))
-  secret_access_key: ((aws_credentials.secret_access_key))
-  endpoint: ((storage.endpoint))
-
 jobs:
 - name: cleanup-bosh-director
   serial: true
   plan:
   - in_parallel:
-    - get: bbr-pipeline-tasks-repo
-    - get: bbr-concourse-repo
+    - get: bosh-repave-repo
+    - get: bosh-mgmt
+    - get: scheduler
+      trigger: true
 
   - task: cleanup-director
-    file: bbr-concourse-repo/bbr-concourse-backup-task.yml
+    file: bosh-mgmt/bosh-mgmt/cleanup-bosh-director.yml
     params:
-      <<: *opsman_credentials
+      SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
+      OPSMAN_URL: ((opsman.url))
+      OPSMAN_USERNAME: ((opsman.username))
+      OPSMAN_PASSWORD: ((opsman.password))
+      OPSMAN_PRIVATE_KEY: ((opsman.private-key))
+
+- name: repave
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bosh-mgmt
+    - get: bosh-repave-repo
+    - get: scheduler
+      trigger: true
+
+  - task: repave
+    file: bosh-repave-repo/ci/tasks/repave/task.yml
+    params:
+      SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
+      OPSMAN_URL: ((opsman.url))
+      OPSMAN_USERNAME: ((opsman.username))
+      OPSMAN_PASSWORD: ((opsman.password))
+      OPSMAN_PRIVATE_KEY: ((opsman.private-key))
 
 resource_types:
 - name: pivnet
@@ -34,23 +44,20 @@ resource_types:
     tag: latest-final
 
 resources:
-- name: bbr-pipeline-tasks-repo
+- name: bosh-repave-repo
   type: git
   source:
-    uri: https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks.git
+    uri: https://github.com/pivotalservices/bosh-repave.git
     branch: master
-- name: bbr-concourse-repo
+- name: bosh-mgmt
   type: git
   source:
-    uri: https://github.com/ambercs/bbr-concourse.git
+    uri: https://github.com/ambercs/platform-tools.git
     branch: main
-- name: concourse-backup-bucket
-  type: s3
+- name: scheduler
+  type: time
   source:
-    <<: *s3_credentials
-    regexp: concourse-backup_(.*).tar
-- name: bbr-release
-  type: pivnet
-  source:
-    api_token: ((pivnet.api_token))
-    product_slug: p-bosh-backup-and-restore
+    interval: 168h
+    start: 5:00PM
+    stop: 6:00PM
+    location: America/Chicago

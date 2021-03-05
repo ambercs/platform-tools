@@ -14,6 +14,7 @@ params:
   OPSMAN_URL:
   OPSMAN_USERNAME:
   OPSMAN_PASSWORD:
+  DEPLOYMENTS:
 
 run:
   path: bash
@@ -24,4 +25,6 @@ run:
 
     source bosh-repave-repo/ci/scripts/export-director-metadata
 
-    bosh clean-up --all --keep-orphaned-disks
+    deployment=$(bosh deployments | grep "cf-" | head -n1 | awk '{print $1;}')
+
+    bosh -d $deployment -n recreate diego_cell
