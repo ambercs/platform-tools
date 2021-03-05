@@ -14,7 +14,7 @@ params:
   OPSMAN_URL:
   OPSMAN_USERNAME:
   OPSMAN_PASSWORD:
-  DEPLOYMENTS:
+  DEPLOYMENT:
 
 run:
   path: bash
