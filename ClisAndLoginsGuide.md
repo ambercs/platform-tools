@@ -1,14 +1,20 @@
 Troubleshooting:
-DNS
-Firewall
-Certs
-MTU
-NTP
-https://docs.pivotal.io/ops-manager/2-10/install/trouble-advanced.html
-cd /var/vcap/bosh/log
+    DNS
+    Firewall
+    Certs
+    MTU
+    NTP
+    https://docs.pivotal.io/ops-manager/2-10/install/trouble-advanced.html
+    cd /var/vcap/bosh/log
+
+If you need to generate certs, check this out:
+    Certstrap: https://github.com/square/certstrap
+    CreateCert Script: https://gist.github.com/zmb3/07c0aa6e5cd571c39f8d9963ba792f4e
 
 Where to find all envs and creds,...and ways to store them and use them for login
 Om, cf, bosh
+
+
 
 -------------------------------------------------------------------------------------------------------------------------------
 PKS CLI
@@ -289,7 +295,8 @@ ops-manager.sandbox.haas-${HAAS_NUM}.pez.pivotal.io: 10.xxx.zzz.16
 *.apps.sandbox.haas-${HAAS_NUM}.pez.pivotal.io: 10.xxx.zzz.17
 *.sys.sandbox.haas-${HAAS_NUM}.pez.pivotal.io: 10.xxx.zzz.17
 
--------------------------------------------------------------------------------------------------------------------------------PIVNET CLI
+-------------------------------------------------------------------------------------------------------------------------------
+PIVNET CLI
 -------------------------------------------------------------------------------------------------------------------------------
 How to target
 > pivnet login --api-token=${PIVNET_TOKEN} …..pivnet_token_from_user_info
