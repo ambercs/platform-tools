@@ -4,10 +4,9 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bosh-repave-repo
-    - get: bosh-mgmt
-    - get: scheduler
-      trigger: true
+    - get: source
+    # - get: time
+    #   trigger: true
     - get: platform-automation-image
       resource: platform-automation
       params:
@@ -15,7 +14,7 @@ jobs:
         globs: ["*.tgz"]
   - task: cleanup-director
     image: platform-automation-image
-    file: bosh-mgmt/bosh-repave/cleanup-bosh-director.yml
+    file: source/bosh-repave/cleanup-bosh-director.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -27,13 +26,17 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bosh-mgmt
-    - get: bosh-repave-repo
-    - get: scheduler
-      trigger: true
-
+    - get: source
+    # - get: time
+    #   trigger: true
+    - get: platform-automation-image
+      resource: platform-automation
+      params:
+        unpack: true
+        globs: ["*.tgz"]
   - task: repave
-    file: bosh-mgmt/bosh-repave/repave-diego-cells.yml
+    image: platform-automation-image
+    file: source/bosh-repave/repave-diego-cells.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -50,23 +53,18 @@ resource_types:
     tag: latest-final
 
 resources:
-- name: bosh-repave-repo
-  type: git
-  source:
-    uri: https://github.com/pivotalservices/bosh-repave.git
-    branch: master
-- name: bosh-mgmt
+- name: source
   type: git
   source:
     uri: https://github.com/ambercs/platform-tools.git
     branch: main
-- name: scheduler
-  type: time
-  source:
-    interval: 168h
-    start: 5:00PM
-    stop: 6:00PM
-    location: America/Chicago
+# - name: time
+#   type: time
+#   source:
+#     interval: 168h
+#     start: 5:00PM
+#     stop: 6:00PM
+#     location: America/Chicago
 
 - name: platform-automation
   type: pivnet

@@ -6,6 +6,7 @@ params:
   OPSMAN_URL:
   OPSMAN_USERNAME:
   OPSMAN_PASSWORD:
+  OPSMAN_PRIVATE_KEY:
 
 run:
   path: bash
@@ -14,6 +15,6 @@ run:
   - |
     set -eu
 
-    eval “$(om bosh-env)”
+    eval “$(om bosh-env -i $OM_PRIVATE_KEY)”
 
     bosh clean-up --all --keep-orphaned-disks

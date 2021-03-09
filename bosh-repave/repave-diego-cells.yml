@@ -6,6 +6,7 @@ params:
   OPSMAN_URL:
   OPSMAN_USERNAME:
   OPSMAN_PASSWORD:
+  OPSMAN_PRIVATE_KEY:
   DEPLOYMENT:
 
 run:
@@ -15,7 +16,7 @@ run:
   - |
     set -eu
 
-    eval “$(om bosh-env)”
+    eval “$(om bosh-env -i $OPSMAN_PRIVATE_KEY)”
 
     deployment=$(bosh deployments | grep $DEPLOYMENT | head -n1 | awk '{print $1;}')
 
