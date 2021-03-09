@@ -8,9 +8,14 @@ jobs:
     - get: bosh-mgmt
     - get: scheduler
       trigger: true
-
+    - get: platform-automation-image
+      resource: platform-automation
+      params:
+        unpack: true
+        globs: ["*.tgz"]
   - task: cleanup-director
-    file: bosh-mgmt/bosh-mgmt/cleanup-bosh-director.yml
+    image: platform-automation-image
+    file: bosh-mgmt/bosh-repave/cleanup-bosh-director.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -28,7 +33,7 @@ jobs:
       trigger: true
 
   - task: repave
-    file: bosh-mgmt/bosh-mgmt/repave-diego-cells.yml
+    file: bosh-mgmt/bosh-repave/repave-diego-cells.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -62,3 +67,10 @@ resources:
     start: 5:00PM
     stop: 6:00PM
     location: America/Chicago
+
+- name: platform-automation
+  type: pivnet
+  source:
+    api_token: ((pivnet-api-token))
+    product_slug: platform-automation
+    product_version: 5\..*

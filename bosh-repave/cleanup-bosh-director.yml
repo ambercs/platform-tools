@@ -1,13 +1,5 @@
 ---
 platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: pivotalservices/bosh2
-    tag: latest
-
-inputs:
-  - name: bosh-repave-repo
 
 params:
   SKIP_SSL_VALIDATION: false
@@ -22,6 +14,6 @@ run:
   - |
     set -eu
 
-    source bosh-repave-repo/ci/scripts/export-director-metadata
+    eval “$(om bosh-env)”
 
     bosh clean-up --all --keep-orphaned-disks
