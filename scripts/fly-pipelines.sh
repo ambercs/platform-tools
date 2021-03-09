@@ -40,41 +40,18 @@ fi
 
 set -ex
 
-fly -t "$TARGET" set-pipeline -p cert-expiry \
-    -c ${BASEDIR}/pipelines/cert-expiry-pipeline.yml \
-    -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml
-
-fly -t "$TARGET" set-pipeline -p rotate-certificates \
-    -c ${BASEDIR}/pipelines/rotate-certificates-pipeline.yml \
-    -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml
-
-${BASEDIR}/scripts/flytt.sh patch-pipeline "$TEAM" "$TARGET" \
-    -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml \
-    -v changes-allowed=false -v debug=false \
-    -v send-notification=true -v exclude-tas-components=false \
-    -v git-branch=main
-
-${BASEDIR}/scripts/flytt.sh upgrade-pipeline "$TEAM" "$TARGET" \
-    -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml \
-    -v changes-allowed=true -v debug=false
+fly -t "$TARGET" set-pipeline -p <PIPELINE_NAME> \
+    -c ${BASEDIR}/<PIPELINE_YAML>.yml \
+    -l ${BASEDIR}/environments/aws/"$TEAM"/<PIPELINE_VARS>.yml
 
 set +ex
 
 if [ $TEAM == "sandbox" ]; then
 
     set -ex
-    fly -t "$TARGET" sp -p get-latest-versions \
-        -c ${BASEDIR}/pipelines/get-latest-versions-pipeline.yml \
-        -l ${BASEDIR}/pipelines/vars/get-latest-versions.yml \
-        -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml \
-        -l ${BASEDIR}/environments/aws/"$TEAM"/config-director/vars/director.yml \
 
-    fly -t "$TARGET" sp -p start-stop-foundation \
-        -c ${BASEDIR}/pipelines/start-stop-environment-pipeline.yml \
-        -l ${BASEDIR}/environments/aws/"$TEAM"/pipeline-vars/global.yml \
-        -l ${BASEDIR}/environments/aws/"$TEAM"/config-director/vars/director.yml
-
-    fly -t "$TARGET" sp -p check-open-prs \
-        -c ${BASEDIR}/pipelines/check-open-prs-pipeline.yml
+    fly -t "$TARGET" set-pipeline -p <PIPELINE_NAME> \
+    -c ${BASEDIR}/<PIPELINE_YAML>.yml \
+    -l ${BASEDIR}/environments/aws/"$TEAM"/<PIPELINE_VARS>.yml
 
 fi
