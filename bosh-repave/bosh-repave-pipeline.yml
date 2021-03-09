@@ -4,7 +4,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: source
+    - get: repo
     # - get: time
     #   trigger: true
     - get: platform-automation-image
@@ -14,7 +14,7 @@ jobs:
         globs: ["*.tgz"]
   - task: cleanup-director
     image: platform-automation-image
-    file: source/bosh-repave/cleanup-bosh-director.yml
+    file: repo/bosh-repave/cleanup-bosh-director.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -26,7 +26,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: source
+    - get: repo
     # - get: time
     #   trigger: true
     - get: platform-automation-image
@@ -36,7 +36,7 @@ jobs:
         globs: ["*.tgz"]
   - task: repave
     image: platform-automation-image
-    file: source/bosh-repave/repave-diego-cells.yml
+    file: repo/bosh-repave/repave-diego-cells.yml
     params:
       SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
       OPSMAN_URL: ((opsman.url))
@@ -53,7 +53,7 @@ resource_types:
     tag: latest-final
 
 resources:
-- name: source
+- name: repo
   type: git
   source:
     uri: https://github.com/ambercs/platform-tools.git

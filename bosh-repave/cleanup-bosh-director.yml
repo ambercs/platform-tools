@@ -15,6 +15,7 @@ run:
   - |
     set -eu
 
-    eval “$(om bosh-env -i $OM_PRIVATE_KEY)”
+    eval “$(om bosh-env -i $OPSMAN_PRIVATE_KEY)”
+    #eval "$(om -p $OPSMAN_PASSWORD -u $OPSMAN_USERNAME -t $OPSMAN_URL bosh-env -i $OPSMAN_PRIVATE_KEY)"
 
     bosh clean-up --all --keep-orphaned-disks
