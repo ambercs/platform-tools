@@ -8,6 +8,7 @@ params:
   OPSMAN_PASSWORD:
   OPSMAN_PRIVATE_KEY:
   DEPLOYMENT:
+  JOB:
 
 run:
   path: bash
@@ -16,9 +17,9 @@ run:
   - |
     set -eu
 
-    eval “$(om bosh-env -i $OPSMAN_PRIVATE_KEY)”
     #eval "$(om -p $OPSMAN_PASSWORD -u $OPSMAN_USERNAME -t $OPSMAN_URL bosh-env -i $OPSMAN_PRIVATE_KEY)"
+    #eval "$(om -k -p $OPSMAN_PASSWORD -u $OPSMAN_USERNAME -t $OPSMAN_URL bosh-env)"
 
-    deployment=$(bosh deployments | grep $DEPLOYMENT | head -n1 | awk '{print $1;}')
+    deployment=$(bosh deployments --column=name | grep $DEPLOYMENT | head -1)
 
-    bosh -d $deployment -n recreate diego_cell
+    bosh -d $deployment -n recreate $JOB
