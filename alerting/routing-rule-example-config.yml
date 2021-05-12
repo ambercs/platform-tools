@@ -1,0 +1,14 @@
+### ALERTMANAGER CONFIGURATION ###
+##  Use prometheus docs to help with routing config https://prometheus.io/docs/alerting/latest/configuration/#route
+
+## ROUTING RULES YAML ##
+route:
+ receiver: 'Email Alert'
+ group_by: ['severity']
+ group_wait: 30s
+ group_interval: 5m
+ repeat_interval: 3h
+ routes:
+ - receiver: 'Slack Alert'
+   match:
+    severity: critical

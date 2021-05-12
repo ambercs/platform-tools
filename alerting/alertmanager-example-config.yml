@@ -1,0 +1,361 @@
+### ALERTMANAGER CONFIGURATION ###
+##  Health watch config rules are helpful https://docs.pivotal.io/healthwatch/2-1/configuring/optional-config/tas_alerting_rules.yml
+##  and alerting rules https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+
+## ALERTING RULES YAML ##
+groups:
+- name: DiegoAlerts
+  rules:
+  # healthwatch.diego.availablefreechunks
+  - alert: Diego-Memory-FreeChunks-Critical
+    expr: 'sum by (deployment)(floor(CapacityRemainingMemory / (4*1024))) < 2'
+    for: 10s
+    labels:
+      severity: critical
+    annotations:
+      summary: FreeMemoryChunks-Alert-Critical
+      description: |
+         Value: {{$value}}
+         You have critical level of low number fo free Diego memory chunks for {{ $labels.deployment }}.
+  - alert: Diego-Memory-FreeChunks-Warning
+    expr: 'sum by (deployment)(floor(CapacityRemainingMemory / (4*1024))) < 3'
+    for: 10s
+    labels:
+      severity: warning
+    annotations:
+      summary: FreeMemoryChunks-Alert-Warning
+      description: |
+         Value: {{$value}}
+         You have warning level of  low number fo free Diego memory chunks for {{ $labels.deployment }}.
+  # Healthwatch.diego.total percentage available memorycapacity.5m
+  - alert: TASDiegoMemoryUsed-Warning
+    expr: 'label_replace((sum by (deployment) (CapacityTotalMemory) - sum by (deployment) (CapacityRemainingMemory) ) / sum by (deployment) (CapacityTotalMemory), "deployment", "cf", "deployment", "") > .65'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Available memory for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 65% of your available Diego Cell memory capacity for ({{ $labels.deployment }}) for at least 5 minutes.
+         Low memory can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough memory available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available memory should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+  - alert: TASDiegoMemoryUsed-Critical
+    expr: 'label_replace((sum by (deployment) (CapacityTotalMemory) - sum by (deployment) (CapacityRemainingMemory) ) / sum by (deployment) (CapacityTotalMemory), "deployment", "cf", "deployment", "") > .75'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Available memory for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 75% of your available Diego Cell memory capacity for ({{ $labels.deployment }}) for at least 5 minutes.
+         Low memory can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough memory available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available memory should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+  # Healthwatch.diego.total available memorycapacity.5m
+  - alert: TASDiegoMemoryUsed-Warning
+    expr: 'label_replace((sum by (deployment) (CapacityTotalMemory) - sum by (deployment) (CapacityRemainingMemory) ) / sum by (deployment) (CapacityTotalMemory), "deployment", "cf", "deployment", "") > .65'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Available memory for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 65% of your available Diego Cell memory capacity for ({{ $labels.deployment }}) for at least 5 minutes.
+         Low memory can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough memory available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available memory should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+  - alert: TASDiegoMemoryUsed-Critical
+    expr: 'label_replace((sum by (deployment) (CapacityTotalMemory) - sum by (deployment) (CapacityRemainingMemory) ) / sum by (deployment) (CapacityTotalMemory), "deployment", "cf", "deployment", "") > .75'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Available memory for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 75% of your available Diego Cell memory capacity for ({{ $labels.deployment }}) for at least 5 minutes.
+         Low memory can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough memory available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available memory should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+  # healthwatch.diego.availablefreechunksdisk
+  - alert: TASDiegoDiskUsed-Warning
+    expr: 'label_replace( (sum by (deployment) (CapacityTotalDisk) - sum by (deployment) (CapacityRemainingDisk) ) / sum by (deployment) (CapacityTotalDisk), "deployment", "cf", "deployment", "") > .65'
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Available disk for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 65% of your available Diego Cell disk capacity for ({{ $labels.deployment }}) for at least 10 minutes.
+         Low disk capacity can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough disk available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available disk should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+  - alert: TASDiegoDiskUsed-Critical
+    expr: 'label_replace( (sum by (deployment) (CapacityTotalDisk) - sum by (deployment) (CapacityRemainingDisk) ) / sum by (deployment) (CapacityTotalDisk), "deployment", "cf", "deployment", "") > .75'
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Available disk for Diego Cells is running low"
+      description: |
+         Value: {{$value}}
+         You have exceeded 75% of your available Diego Cell disk capacity for ({{ $labels.deployment }}) for at least 10 minutes.
+         Low disk capacity can prevent app scaling and new deployments. The overall sum of capacity can indicate that you need to scale the platform.
+         It is recommended that you have enough disk available to suffer a possible failure of an entire availability zone (AZ).
+         If following the best practice guidance of three AZs, your % available disk should always be at least 35%.
+
+         Troubleshooting Steps:
+         Assign more resources to the cells or assign more cells by scaling Diego cells in the Resource Config pane of the Tanzu Application Service tile.
+
+- name: TASCPU
+  rules:
+  # bosh-system-metrics-forwarder.system.cpu.user
+  - alert: TASCPUUtilization-Warning
+    expr: 'system_cpu_user{origin="bosh-system-metrics-forwarder"} >= 80 OR system_cpu_user{origin="system_metrics_agent"} >= 80'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The Tanzu Application Service is experiencing average CPU utilization above 80%"
+      description: |
+         Value: {{$value}}
+         High CPU utilization can increase latency and cause throughput, or requests per/second, to level-off. It is recommended to keep the CPU utilization within a maximum range of 60-70% for best performance.
+
+         Troubleshooting Steps:
+         Resolve high utilization by scaling horizontally, or vertically by editing the VM in the Resource Config pane of the Tanzu Application Service tile.
+  - alert: TASCPUUtilization-Critical
+    expr: 'system_cpu_user{origin="bosh-system-metrics-forwarder"} >= 90 OR system_cpu_user{origin="system_metrics_agent"} >= 90'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "The Tanzu Application Service is experiencing average CPU utilization above 90%"
+      description: |
+         Value: {{$value}}
+         High CPU utilization can increase latency and cause throughput, or requests per/second, to level-off. It is recommended to keep the CPU utilization within a maximum range of 60-70% for best performance.
+
+         Troubleshooting Steps:
+         Resolve high utilization by scaling horizontally, or vertically by editing the VM in the Resource Config pane of the Tanzu Application Service tile.
+
+- name: TASRouter
+  rules:
+  # bosh-system-metrics-forwarder.system.cpu.user.router
+  - alert: TASRouterCPUUtilization-Warning
+    expr: 'system_cpu_user{exported_job="router", origin="bosh-system-metrics-forwarder"} >= 80 OR system_cpu_user{exported_job="router", origin="system_metrics_agent"} >= 80'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The Tanzu Application Service Router is experiencing average CPU utilization above 80%"
+      description: |
+         Value: {{$value}}
+         High CPU utilization of the Gorouter VMs can increase latency and cause throughput, or requests per/second, to level-off. It is recommended to keep the CPU utilization within a maximum range of 60-70% for best Gorouter performance.
+
+         Troubleshooting Steps:
+         Resolve high utilization by scaling the Gorouters horizontally, or vertically by editing the Router VM in the Resource Config pane of the Tanzu Application Service tile.
+  - alert: TASRouterCPUUtilization-Critical
+    expr: 'system_cpu_user{exported_job="router", origin="bosh-system-metrics-forwarder"} >= 90 OR system_cpu_user{exported_job="router", origin="system_metrics_agent"} >= 90'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "The Tanzu Application Service Router is experiencing average CPU utilization above 90%"
+      description: |
+         Value: {{$value}}
+         High CPU utilization of the Gorouter VMs can increase latency and cause throughput, or requests per/second, to level-off. It is recommended to keep the CPU utilization within a maximum range of 60-70% for best Gorouter performance.
+
+         Troubleshooting Steps:
+         Resolve high utilization by scaling the Gorouters horizontally, or vertically by editing the Router VM in the Resource Config pane of the Tanzu Application Service tile.
+
+- name: VMPersistentDiskUsed
+  rules:
+  # bosh-system-metrics-forwarder.system.disk.persistent.percent
+  - alert: VMPersistentDiskUsed-Critical
+    expr: 'system_disk_persistent_percent{origin="bosh-system-metrics-forwarder"} > 90'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "The Tanzu system disk persistent is experiencing average disk utilization above 90%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the disk persistent within a maximum range of 60-70% for best performance.
+  - alert: VMPersistentDiskUsed-Warning
+    expr: 'system_disk_persistent_percent{origin="bosh-system-metrics-forwarder"} > 80'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The Tanzu system disk persistent is experiencing average disk utilization above 80%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the disk persistent within a maximum range of 60-70% for best performance.
+
+- name: VMDiskUsed
+  rules:
+  # bosh-system-metrics-forwarder.system.disk.system.percent
+  - alert: VMDiskUsed-Critical
+    expr: 'system_disk_system_percent{origin="bosh-system-metrics-forwarder"} > 90'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "The Tanzu system disk used is experiencing average disk utilization above 90%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the system disk used within a maximum range of 60-70% for best performance.
+  - alert: VMDiskUsed-Warning
+    expr: 'system_disk_system_percent{origin="bosh-system-metrics-forwarder"} > 80'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The Tanzu system disk used is experiencing average disk utilization above 80%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the disk used within a maximum range of 60-70% for best performance.
+
+- name: gorouterlatency
+  rules:
+  # gorouter.latency
+  - alert: gorouterlatency-Critical
+    expr: 'latency{origin="gorouter"} > 800'
+    for: 10s
+    labels:
+      severity: critical
+    annotations:
+      summary: "The Router Handling Latency measurement has crossed a critical threshold - above 800ms"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the gorouter latency within a maximum range of 60-70% for best performance.
+  - alert: gorouterlatency-Warning
+    expr: 'latency{origin="gorouter"} > 500'
+    for: 10s
+    labels:
+      severity: warning
+    annotations:
+      summary: "The Router Handling Latency measurement has crossed a critical threshold - above 500ms"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the gorouter latency within a maximum range of 60-70% for best performance.
+
+- name: firehoselossrate
+  rules:
+  # firehose eggress lossrate.5m - Log Transport Loss Rate
+  - alert: firehoselossrate-Warning
+    expr: 'sum(rate(dropped{source_id="doppler",direction="egress"}[5m])) / sum(rate(egress{source_id="doppler"}[5m])) > .05'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The firehose eggress loss rate has crossed a warning threshold - above 5%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the firehose eggress loss rate within a maximum range of 0%-5% for best performance.
+
+- name: syslogagent-lossrate
+  rules:
+  # syslogagent eggress lossrate.5m - Syslog Adapter Loss Rate
+  - alert: syslogagentlossrate-Warning
+    expr: 'sum(rate(dropped{source_id="syslog_agent",direction="egress"}[5m])) / sum(rate(egress{source_id="syslog_agent"}[5m])) > .01'
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The syslogagent eggress loss rate has crossed a warning threshold - above 1%"
+      description: |
+         Value: {{$value}}
+         It is recommended to keep the syslogagent eggress loss rate within a maximum range of 0%-1% for best performance.
+
+- name: health.check.clicommand
+  rules:
+    # Healthwatch CLI Health Test Availability
+  - alert: TASCLICommandStatus-Warning
+    expr: "increase(pas_sli_task_failures_total[10m]) > 0"
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Healthwatch Tanzu Application Service CLI tests are failing"
+      description: |
+         Value: {{$value}}
+         One or more CLI tests have been failing for at least 10 minutes.
+         App Smoke Tests run every 5-minutes. When running HA, multiple smoke tests may run in the given 5-minutes. These tests are intended to give Platform Operators confidence that Application Developers can successfully interact with and manage applications on the platform.
+         Note: smoke tests will report a failure if any task (e.g. `push`, `login`) takes more than 5 minutes to complete.
+
+         Troubleshooting Steps:
+         If a failure occurs, attempt to use the failed CLI command in a terminal to see why it is failing.
+    # health check clicommand cf_push
+  - alert: TanzuSLOCFPushAvailability-Warning
+    expr: 'rate(pas_sli_task_failures_total{task="push"}[5m:15s]) * 300 > 0'
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The `cf_push` command is unresponsive"
+      description: |
+         Value: {{$value}}
+         This alert fires when the command has been unresponsive for 10 minutes.
+
+         This commonly occurs when:
+         - Diego is under-scaled
+         - UAA is unresponsive
+         - Cloud Controller is unresponsive
+
+         Check the status of these components in order to diagnose the issue.
+    # health check clicommand cf_push duration
+  - alert: TanzuSLOCFPushTime-Warning
+    expr: 'max(increase(pas_sli_task_duration_seconds_sum{task="push", origin="pas-sli-exporter"}[5m])) > 10'
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The `cf_push` command is experiencing longer than expected."
+      description: |
+         Value: {{$value}}
+         This alert fires when the command has been slow for 10 minutes.
+
+         This commonly occurs when:
+         - Diego is under-scaled
+         - UAA is unresponsive
+         - Cloud Controller is unresponsive
+
+         Check the status of these components in order to diagnose the issue.
+    # health check clicommand cf stop
+  - alert: TanzuSLOCFSTOPAvailability-Warning
+    expr: 'rate(pas_sli_task_failures_total{task="stop"}[5m:15s]) * 300 > 0'
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "The `cf stop` command is unresponsive"
+      description: |
+         Value: {{$value}}
+         This alert fires when the command has been unresponsive for 10 minutes.
+
+         This commonly occurs when:
+         - Diego is under-scaled
+         - UAA is unresponsive
+         - Cloud Controller is unresponsive
+
+         Check the status of these components in order to diagnose the issue.

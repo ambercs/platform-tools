@@ -1,0 +1,22 @@
+### ALERTMANAGER CONFIGURATION ###
+##  Use prometheus docs to help with receiver config https://prometheus.io/docs/alerting/latest/configuration/#receiver
+
+## EMAIL RECEIVER CONFIGURATIONS ##
+# Receiver Name #
+Email Alert
+
+# Receiver Configuration #
+to: <DL_OR_EMAIL>
+from: <DL_OR_EMAIL>
+smarthost: <HOST>:25
+require_tls: false
+send_resolved: true
+
+## SLACK RECEIVER CONFIGURATIONS ##
+# Receiver Name #
+Slack Alert
+
+# Receiver Configuration #
+api_url: <SLACK_WEBHOOK>
+channel: <SLACK_CHANNEL
+send_resolved: true
