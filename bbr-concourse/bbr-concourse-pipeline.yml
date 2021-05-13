@@ -1,10 +1,9 @@
-
 opsman_credentials: &opsman_credentials
-  SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
-  OPSMAN_URL: ((opsman.url))
-  OPSMAN_USERNAME: ((opsman.username))
-  OPSMAN_PASSWORD: ((opsman.password))
-  OPSMAN_PRIVATE_KEY: ((opsman.private-key))
+  OM_SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
+  OM_URL: ((opsman.url))
+  OM_USERNAME: ((opsman.username))
+  OM_PASSWORD: ((opsman.password))
+  OM_PRIVATE_KEY: ((opsman.private-key))
 
 s3_credentials: &s3_credentials
   bucket: ((storage.backup-bucket))
@@ -12,36 +11,6 @@ s3_credentials: &s3_credentials
   access_key_id: ((aws_credentials.access_key_id))
   secret_access_key: ((aws_credentials.secret_access_key))
   endpoint: ((storage.endpoint))
-
-jobs:
-- name: bbr-backup-concourse
-  serial: true
-  plan:
-  - in_parallel:
-    - get: bbr-pipeline-tasks-repo
-    - get: bbr-concourse-repo
-    - get: bbr-release
-  - task: check-opsman-status
-    file: bbr-pipeline-tasks-repo/tasks/check-opsman-status/task.yml
-    params:
-      <<: *opsman_credentials
-  - task: extract-binary
-    file: bbr-pipeline-tasks-repo/tasks/extract-bbr-binary/task.yml
-
-  - task: bbr-backup-concourse
-    file: bbr-concourse-repo/bbr-concourse/bbr-concourse-backup-task.yml
-    params:
-      DEPLOYMENT_NAME: concourse
-      <<: *opsman_credentials
-    on_failure:
-      task: bbr-cleanup-concourse
-      file: bbr-concourse-repo/bbr-concourse/bbr-concourse-cleanup-task.yml
-      params:
-        DEPLOYMENT_NAME: concourse
-        <<: *opsman_credentials
-  - put: concourse-backup-bucket
-    params:
-      file: concourse-backup-artifact/concourse-backup_*.tar
 
 resource_types:
 - name: pivnet
@@ -71,3 +40,32 @@ resources:
   source:
     api_token: ((pivnet.api_token))
     product_slug: p-bosh-backup-and-restore
+
+jobs:
+- name: bbr-backup-concourse
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bbr-pipeline-tasks-repo
+    - get: bbr-concourse-repo
+    - get: bbr-release
+  - task: check-opsman-status
+    file: bbr-pipeline-tasks-repo/tasks/check-opsman-status/task.yml
+    params:
+      <<: *opsman_credentials
+  - task: extract-binary
+    file: bbr-pipeline-tasks-repo/tasks/extract-bbr-binary/task.yml
+  - task: bbr-backup-concourse
+    file: bbr-concourse-repo/bbr-concourse/bbr-concourse-backup-task.yml
+    params:
+      DEPLOYMENT_NAME: concourse
+      <<: *opsman_credentials
+    on_failure:
+      task: bbr-cleanup-concourse
+      file: bbr-concourse-repo/bbr-concourse/bbr-concourse-cleanup-task.yml
+      params:
+        DEPLOYMENT_NAME: concourse
+        <<: *opsman_credentials
+  - put: concourse-backup-bucket
+    params:
+      file: concourse-backup-artifact/concourse-backup_*.tar

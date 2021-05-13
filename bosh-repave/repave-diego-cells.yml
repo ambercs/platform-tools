@@ -3,10 +3,10 @@ platform: linux
 
 params:
   SKIP_SSL_VALIDATION: false
-  OPSMAN_URL:
-  OPSMAN_USERNAME:
-  OPSMAN_PASSWORD:
-  OPSMAN_PRIVATE_KEY:
+  OM_TARGET:
+  OM_USERNAME:
+  OM_PASSWORD:
+  OM_PRIVATE_KEY:
   DEPLOYMENT:
   JOB:
 
@@ -17,8 +17,8 @@ run:
   - |
     set -eu
 
-    #eval "$(om -p $OPSMAN_PASSWORD -u $OPSMAN_USERNAME -t $OPSMAN_URL bosh-env -i $OPSMAN_PRIVATE_KEY)"
-    #eval "$(om -k -p $OPSMAN_PASSWORD -u $OPSMAN_USERNAME -t $OPSMAN_URL bosh-env)"
+    #eval "$(om bosh-env -i $OM_PRIVATE_KEY)"
+    #eval "$(om -k bosh-env)"
 
     deployment=$(bosh deployments --column=name | grep $DEPLOYMENT | head -1)
 

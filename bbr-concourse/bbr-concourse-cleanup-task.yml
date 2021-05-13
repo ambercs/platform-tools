@@ -8,8 +8,21 @@ image_resource:
     tag: final
 
 inputs:
-  - name: bbr-pipeline-tasks-repo
   - name: binary
+
+params:
+  # The Ops Manager URL, e.g. https://pcf.example.com
+  OM_URL:
+  OM_SKIP_SSL_VALIDATION: false
+  OM_USERNAME:
+  OM_PASSWORD:
+  OM_PRIVATE_KEY:
+
+  # Client credentials for Ops Manager API. If empty, user credentials will be used
+  OM_CLIENT_ID:
+  OM_CLIENT_SECRET:
+
+  DEPLOYMENT_NAME:
 
 run:
   path: bash
@@ -18,7 +31,7 @@ run:
   - |
     set -eu
 
-    source bbr-pipeline-tasks-repo/scripts/export-director-metadata
+    eval "$(om bosh-env -i $OM_PRIVATE_KEY)""
 
     ./binary/bbr deployment \
       --target "$BOSH_ENVIRONMENT" \
@@ -26,27 +39,3 @@ run:
       --deployment "$DEPLOYMENT_NAME" \
       --ca-cert "$BOSH_CA_CERT_PATH" \
       backup-cleanup
-
-params:
-  # The Ops Manager URL, e.g. https://pcf.example.com
-  OPSMAN_URL:
-
-  # If true, SSL validation will be skipped when connecting to Ops Manager API
-  SKIP_SSL_VALIDATION: false
-
-  # Client credentials for Ops Manager API. If empty, user credentials will be used
-  CLIENT_ID:
-  CLIENT_SECRET:
-
-  # User credentials for Ops Manager API
-  OPSMAN_USERNAME:
-  OPSMAN_PASSWORD:
-
-  # The SSH private key for the Ops Manager VM
-  # If provided, a SSH tunnel through the Ops Manager VM is created and used by bbr
-  OPSMAN_PRIVATE_KEY:
-
-  # Config NO_PROXY for BOSH cli and OM
-  # Setting SET_NO_PROXY: true results in NO_PROXY being exported
-  # with the BOSH Director IP
-  SET_NO_PROXY:

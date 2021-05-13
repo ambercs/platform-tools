@@ -1,3 +1,38 @@
+opsman_credentials: &opsman_credentials
+  OM_SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
+  OM_URL: ((opsman.url))
+  OM_USERNAME: ((opsman.username))
+  OM_PASSWORD: ((opsman.password))
+  OM_PRIVATE_KEY: ((opsman.private-key))
+
+resource_types:
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+
+resources:
+- name: repo
+  type: git
+  source:
+    uri: https://github.com/ambercs/platform-tools.git
+    branch: main
+
+- name: platform-automation
+  type: pivnet
+  source:
+    api_token: ((pivnet-api-token))
+    product_slug: platform-automation
+    product_version: 5\..*
+
+# - name: time
+#   type: time
+#   source:
+#     interval: 168h
+#     start: 5:00PM
+#     stop: 6:00PM
+#     location: America/Chicago
 
 jobs:
 - name: cleanup-bosh-director
@@ -16,13 +51,9 @@ jobs:
     image: platform-automation-image
     file: repo/bosh-repave/cleanup-bosh-director.yml
     params:
-      SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
-      OPSMAN_URL: ((opsman.url))
-      OPSMAN_USERNAME: ((opsman.username))
-      OPSMAN_PASSWORD: ((opsman.password))
-      OPSMAN_PRIVATE_KEY: ((opsman.private-key))
+      <<: *opsman_credentials
 
-- name: repave
+- name: repave-diego-cells
   serial: true
   plan:
   - in_parallel:
@@ -38,38 +69,6 @@ jobs:
     image: platform-automation-image
     file: repo/bosh-repave/repave-diego-cells.yml
     params:
-      SKIP_SSL_VALIDATION: ((opsman.skip-ssl-validation))
-      OPSMAN_URL: ((opsman.url))
-      OPSMAN_USERNAME: ((opsman.username))
-      OPSMAN_PASSWORD: ((opsman.password))
-      OPSMAN_PRIVATE_KEY: ((opsman.private-key))
+      <<: *opsman_credentials
       DEPLOYMENT: "cf"
       JOB: "diego_cell"
-
-resource_types:
-- name: pivnet
-  type: docker-image
-  source:
-    repository: pivotalcf/pivnet-resource
-    tag: latest-final
-
-resources:
-- name: repo
-  type: git
-  source:
-    uri: https://github.com/ambercs/platform-tools.git
-    branch: main
-# - name: time
-#   type: time
-#   source:
-#     interval: 168h
-#     start: 5:00PM
-#     stop: 6:00PM
-#     location: America/Chicago
-
-- name: platform-automation
-  type: pivnet
-  source:
-    api_token: ((pivnet-api-token))
-    product_slug: platform-automation
-    product_version: 5\..*
