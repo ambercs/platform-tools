@@ -1,10 +1,20 @@
 #!/bin/bash
+echo "Select team to fly pipelines:
+1. macOS
+2. linux"
+read -r selection
+
+if [ "$selection" == "1" ] || [ "$selection" == "macOS" ] || [ "$selection" == "mac" ]; then
+    OS=darwin
+else
+    OS=linux
+fi
 
 # PIVNET CLI #
 NAME="pivnet"
 PRODUCT="pivnet-cli"
 REPO="pivotal-cf"
-FILE_TYPE="linux-amd64"
+FILE_TYPE="$OS-amd64"
 VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
 | grep "tag_name" \
 | awk '{print substr($2, 2, length($2)-3)}' \
@@ -21,7 +31,7 @@ sudo mv $NAME /usr/local/bin
 
 # OM CLI #
 NAME="om"
-PRODUCT="om-linux"
+PRODUCT="om-$OS"
 REPO="pivotal-cf"
 FILE_TYPE=".tar.gz"
 VERSION=$(curl -s https://api.github.com/repos/$REPO/$NAME/releases/latest \
@@ -44,7 +54,7 @@ sudo mv $NAME /usr/local/bin
 NAME="bosh"
 PRODUCT="bosh-cli"
 REPO="cloudfoundry"
-FILE_TYPE="linux-amd64"
+FILE_TYPE="$OS-amd64"
 VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
 | grep "tag_name" \
 | awk '{print substr($2, 2, length($2)-3)}' \
@@ -71,11 +81,17 @@ VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
 printf "\n\nInstalling %s cli\n" $NAME
 printf "Downloading the %s cli: https://github.com/%s/%s/releases \n" $NAME $REPO $PRODUCT
 
-wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-sudo apt-get update
-sudo apt-get install cf7-cli
-$NAME -v
+if [[ $OS == darwin ]]; then
+    brew update
+    brew install cloudfoundry/tap/cf-cli@6
+    $NAME -v
+else
+    wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+    echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+    sudo apt-get update
+    sudo apt-get install cf7-cli
+    $NAME -v
+fi
 
 # CREDHUB CLI #
 #if credhub is not installed, go ahead with install
@@ -86,7 +102,7 @@ VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
     | grep "tag_name" \
     | awk '{print substr($2, 2, length($2)-3)}' \
     | sed 's/v//g')
-FILE="$NAME-linux-$VERSION.tgz"
+FILE="$NAME-$OS-$VERSION.tgz"
 
 printf "\n\nInstalling %s cli\n" $NAME
 printf "Downloading the %s cli: https://github.com/%s/%s/releases \n" $NAME $REPO $PRODUCT
@@ -103,7 +119,7 @@ sudo mv $NAME /usr/local/bin
 NAME="bbr"
 PRODUCT="bosh-backup-and-restore"
 REPO="cloudfoundry-incubator"
-FILE_TYPE="linux-amd64"
+FILE_TYPE="$OS-amd64"
 VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
     | grep "tag_name" \
     | awk '{print substr($2, 2, length($2)-3)}' \
@@ -122,7 +138,7 @@ sudo mv $NAME /usr/local/bin
 NAME="fly"
 PRODUCT="concourse"
 REPO="concourse"
-FILE_TYPE="linux-amd64.tgz"
+FILE_TYPE="$OS-amd64.tgz"
 VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
 | grep "tag_name" \
 | awk '{print substr($2, 2, length($2)-3)}' \
