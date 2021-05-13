@@ -71,25 +71,16 @@ sudo mv $NAME /usr/local/bin
 
 # CF CLI #
 NAME="cf"
-PRODUCT="cli"
-REPO="cloudfoundry"
-VERSION=$(curl -s https://api.github.com/repos/$REPO/$PRODUCT/releases/latest \
-    | grep "tag_name" \
-    | awk '{print substr($2, 2, length($2)-3)}' \
-    | sed 's/v//g')
-
 printf "\n\nInstalling %s cli\n" $NAME
-printf "Downloading the %s cli: https://github.com/%s/%s/releases \n" $NAME $REPO $PRODUCT
+printf "Downloading the %s cli: https://github.com/cloudfoundry/cli/wiki/V6-CLI-Installation-Guide \n" $NAME
 
 if [[ $OS == darwin ]]; then
     brew update
     brew install cloudfoundry/tap/cf-cli@6
     $NAME -v
 else
-    wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-    echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-    sudo apt-get update
-    sudo apt-get install cf7-cli
+    curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github&version=v6" | tar -zx
+    mv cf /usr/local/bin
     $NAME -v
 fi
 

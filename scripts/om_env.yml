@@ -1,0 +1,8 @@
+#Example env.yml for om cli authentication
+
+username: admin
+password: $OM_PASSWORD
+# client-id: admin
+# client-secret=$OM_PASSWORD
+target: https://ops-manager...
+skip-ssl-validation: true
